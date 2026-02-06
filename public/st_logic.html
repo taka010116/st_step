@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Strategy Steps 理論まとめ</title>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+<style>
+body {
+  font-family: sans-serif;
+  margin: 20px;
+  line-height: 1.6;
+  background: #f2f2f2;
+}
+h1, h2, h3 {
+  color: #333;
+}
+section {
+  background: #fff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  box-shadow: 1px 1px 5px #ccc;
+}
+.code {
+  background: #eee;
+  padding: 10px;
+  font-family: monospace;
+  border-radius: 5px;
+}
+</style>
+</head>
+<body>
+
+<h1>Strategy Steps（かぶるな階段）理論まとめ</h1>
+
+<section>
+<h2>1. ゲームルール</h2>
+<ul>
+<li>プレイヤー: 4人（P1: 人間、P2-P4: CPU/プレイヤー）</li>
+<li>ゴール: 12段</li>
+<li>各ターンで選べる数字: 1, 3, 5</li>
+<li>同じ数字を誰かと出した場合、進めない</li>
+<li>被らなければ出した数字だけ進む</li>
+<li>ゴールに最初に到達した人が勝ち。順位も記録される</li>
+</ul>
+</section>
+
+<section>
+<h2>2. 単純ランダムCPU相手の期待値戦略</h2>
+<p>CPUが完全ランダム（1/3で1,3,5）を選ぶ場合、出した数字が被らない確率は：</p>
+<p>
+\[
+P(\text{成功}) = \left(\frac{2}{3}\right)^3 = \frac{8}{27} \approx 0.296
+\]
+</p>
+<p>このときの期待値（E）は：</p>
+<p>
+\[
+E(x) = x \cdot P(\text{成功}) = x \cdot 0.296
+\]
+</p>
+<table border="1" cellpadding="5">
+<tr><th>数字</th><th>期待値</th></tr>
+<tr><td>1</td><td>0.296</td></tr>
+<tr><td>3</td><td>0.888</td></tr>
+<tr><td>5</td><td>1.48</td></tr>
+</table>
+<p>当然ながら、5を出し続けるのが良い戦略といえる。</p>
+</section>
+
+<section>
+<h2>3. 相手も戦略的に動く場合（2人戦略）</h2>
+<p>2人同時選択ゲームの例：</p>
+<div class="code">
+| あなた \ 相手 | 1 | 3 | 5 |<br>
+|---------------|---|---|---|<br>
+| 1             | 0,0 | 1,3 | 1,5 |<br>
+| 3             | 3,1 | 0,0 | 3,5 |<br>
+| 5             | 5,1 | 5,3 | 0,0 |
+</div>
+<p>ナッシュ均衡の考え方：相手の戦略が固定されているとき、自分が変更しても期待値が増えない戦略を選ぶ。心理戦＋読み合いが重要。</p>
+</section>
+
+<section>
+<h2>4. 4人全員戦略的プレイヤー（混合戦略ナッシュ均衡）</h2>
+<p>各プレイヤーが選ぶ数字の確率を</p>
+<p>\(p_1, p_3, p_5\) とする。条件：</p>
+<p>
+\[
+p_1 + p_3 + p_5 = 1
+\]
+</p>
+<p>期待値は以下：</p>
+<p>
+\[
+E_1 = 1 \cdot (1 - p_1)^3
+\]<br>
+\[
+E_3 = 3 \cdot (1 - p_3)^3
+\]<br>
+\[
+E_5 = 5 \cdot (1 - p_5)^3
+\]
+</p>
+<p>ナッシュ均衡条件：</p>
+<p>
+\[
+E_1 = E_3 = E_5
+\]
+</p>
+<p>計算の近似結果：</p>
+<ul>
+<li>\(p_1 \approx 0.496\)</li>
+<li>\(p_3 \approx 0.324\)</li>
+<li>\(p_5 \approx 0.180\)</li>
+</ul>
+<p>→ 1を約50%で選び、安全策を重視。3を約32%、5を約18%で選び、リスクとリターンをバランス。</p>
+</section>
+
+<section>
+<h2>5. 実用的戦略ルールまとめ</h2>
+<ol>
+<li>序盤: ゴールが遠い場合は5を狙う（期待値最大）</li>
+<li>中盤: 相手の傾向を見て被らない数字を選ぶ</li>
+<li>終盤: 残り1-2段なら安全策として1を選ぶ</li>
+<li>全体: 混合戦略を意識し、数字を確率的に選ぶ</li>
+</ol>
+</section>
+
+<section>
+<h2>6. まとめ</h2>
+<p>このゲームは以下の性質を持ちます：</p>
+<ul>
+<li>単純確率ゲームでは期待値最大戦略で有利</li>
+<li>相手も戦略的に動く場合は読み合いが必要</li>
+<li>4人全員戦略的な場合、混合戦略ナッシュ均衡が成立</li>
+<li>確率に基づく安全策と攻めのバランスが勝敗を左右する</li>
+</ul>
+</section>
+
+</body>
+</html>

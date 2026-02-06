@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ボードゲーム研究部</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Meiryo", "Segoe UI", sans-serif;
+      background: #ffffff;
+      color: #000;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+
+    header img {
+      max-width: 420px;
+      width: 90%;
+      height: auto;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 30px;
+    }
+
+    .card {
+      text-align: center;
+      border: 1px solid #ccc;
+      padding: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .card img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .card-title {
+      margin-top: 12px;
+      font-size: 16px;
+      letter-spacing: 1px;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- タイトル -->
+  <header>
+    <img src="images/titleK.png" alt="ボードゲーム研究部">
+  </header>
+
+  <!-- コンテンツ -->
+  <main>
+    <div class="grid">
+
+      <!-- Strategy Steps -->
+      <a href="st_step.html" class="card">
+        <img src="images/title.png" alt="Strategy Steps">
+        <div class="card-title">Strategy Steps</div>
+      </a>
+
+      <!-- 別ゲーム -->
+      <a href="https://my-worker.6322052.workers.dev/" class="card">
+        <img src="images/title7.png" alt="ゲーム2">
+        <div class="card-title">Game Title 2</div>
+      </a>
+
+      <!-- 別ゲーム -->
+      <a href="game3.html" class="card">
+        <img src="images/titleD.png" alt="ゲーム3">
+        <div class="card-title">Game Title 3</div>
+      </a>
+
+    </div>
+  </main>
+
+</body>
+</html>

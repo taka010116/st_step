@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Strategy Steps</title>
+
+<style>
+body {
+  font-family: sans-serif;
+  background: #f2f2f2;
+  margin: 0;
+}
+
+/* ---------- 画面切替 ---------- */
+.screen {
+  display: none;
+  padding: 20px;
+}
+.screen.active {
+  display: flex;
+}
+
+/* ---------- マッチング ---------- */
+#matchScreen {
+  flex-direction: column;
+  align-items: center;
+}
+#matchScreen input,
+#matchScreen select,
+#matchScreen button {
+  font-size: 18px;
+  margin: 10px;
+}
+
+/* ---------- ゲーム ---------- */
+#gameScreen {
+  display: flex;
+}
+
+/* ---------- 左：階段 ---------- */
+#stairsWrapper {
+  position: relative;
+  margin: 20px;
+}
+
+.step {
+  width: 200px;
+  height: 30px;
+  border: 1px solid #aaa;
+  background: #fff;
+  box-sizing: border-box;
+  font-size: 12px;
+  padding-left: 5px;
+}
+
+/* 駒 */
+.marker {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 12px;
+  text-align: center;
+  line-height: 22px;
+  transition: top 0.5s ease;
+  display: none;
+}
+
+.p1 { background: red;    left: 10px; }
+.p2 { background: blue;   left: 55px; }
+.p3 { background: green;  left: 100px;}
+.p4 { background: purple; left: 145px; }
+
+/* ---------- 中央 ---------- */
+#game {
+  margin: 20px;
+  width: 220px;
+}
+
+.choiceButtons button {
+  font-size: 20px;
+  width: 60px;
+  height: 60px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.choiceButtons button.locked {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.choiceButtons button.selected {
+  background: red;
+  color: #fff;
+}
+
+#log {
+  margin-top: 15px;
+  font-size: 16px;
+}
+
+/* ---------- 右 ---------- */
+#choices {
+  margin: 20px;
+  width: 260px;
+}
+
+.choiceBox {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  display: none;
+}
+
+.num {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.rank {
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+</style>
+</head>
+<body>
+
+<!-- ================= マッチング ================= -->
+<div id="matchScreen" class="screen active">
+  <h1>Strategy STEPS</h1>
+
+  <input id="nameInput" placeholder="名前" />
+  <input id="roomInput" placeholder="ルームID" />
+
+  <select id="countSelect">
+    <option value="2">2人</option>
+    <option value="3">3人</option>
+    <option value="4">4人</option>
+  </select>
+
+  <button onclick="startMatch()">マッチング開始</button>
+  <div id="matchStatus"></div>
+</div>
+
+<!-- ================= ゲーム ================= -->
+<div id="gameScreen" class="screen">
+
+  <!-- 左 -->
+  <div id="stairsWrapper">
+    <div id="stairs"></div>
+    <div class="marker p1" id="m1"></div>
+    <div class="marker p2" id="m2"></div>
+    <div class="marker p3" id="m3"></div>
+    <div class="marker p4" id="m4"></div>
+  </div>
+
+  <!-- 中央 -->
+  <div id="game">
+    <h2></h2>
+    <div class="choiceButtons">
+      <button onclick="choose(1)">1</button>
+      <button onclick="choose(3)">3</button>
+      <button onclick="choose(5)">5</button>
+    </div>
+    <div id="log"></div>
+  </div>
+
+  <!-- 右 -->
+  <div id="choices">
+    <h2></h2>
+    <div class="choiceBox" id="box1"> <span id="label1"></span>：<span id="c1" class="num">-</span></div>
+    <div class="choiceBox" id="box2"> <span id="label2"></span>：<span id="c2" class="num">-</span></div>
+    <div class="choiceBox" id="box3"> <span id="label3"></span>：<span id="c3" class="num">-</span></div>
+    <div class="choiceBox" id="box4"> <span id="label4"></span>：<span id="c4" class="num">-</span></div>
+    <div id="ranking"></div>
+  </div>
+</div>
+
+<script>
+const GOAL = 12;
+const STEP_HEIGHT = 30;
+
+let ws;
+let myName = "";
+let players = [];
+
+/* ===== マッチング ===== */
+function startMatch() {
+  myName = nameInput.value.trim();
+  const roomId = roomInput.value.trim();
+  const count = countSelect.value;
+
+  if (!myName || !roomId) {
+    alert("名前とルームIDを入力してください");
+    return;
+  }
+
+  ws = new WebSocket(
+    `wss://${location.host}/room/${roomId}?name=${encodeURIComponent(myName)}&players=${count}`
+  );
+
+  ws.onmessage = e => {
+    const msg = JSON.parse(e.data);
+
+    if (msg.type === "waiting") {
+      matchStatus.textContent =
+        `待機中 ${msg.count}/${msg.required}：${msg.players.join(", ")}`;
+    }
+
+    if (msg.type === "start") {
+      players = msg.players;
+      switchScreen("gameScreen");
+      initStairs();
+      initPlayers();
+    }
+
+    if (msg.type === "state") {
+      updateState(msg);
+    }
+  };
+}
+
+/* ===== 初期化 ===== */
+function initStairs() {
+  stairs.innerHTML = "";
+  for (let i = GOAL; i >= 0; i--) {
+    const d = document.createElement("div");
+    d.className = "step";
+    d.textContent = i;
+    stairs.appendChild(d);
+  }
+}
+
+function initPlayers() {
+  players.forEach((p, i) => {
+    const m = document.getElementById(`m${i+1}`);
+    m.style.display = "block";
+    m.textContent = i + 1;
+
+    document.getElementById(`box${i+1}`).style.display = "block";
+    document.getElementById(`label${i+1}`).textContent =
+      p.isCPU ? `${p.name}(CPU)` : p.name;
+  });
+}
+
+/* ===== 状態更新 ===== */
+function updateState(msg) {
+  msg.players.forEach((p, i) => {
+    document.getElementById(`c${i+1}`).textContent = p.choice ?? "-";
+    document.getElementById(`m${i+1}`).style.top =
+      `${(GOAL - p.pos) * STEP_HEIGHT + 4}px`;
+  });
+
+  unlockButtons();
+
+  if (msg.finished) showRanking(msg.ranking);
+}
+
+/* ===== 選択 ===== */
+function choose(v) {
+  lockButtons(v);
+  ws.send(JSON.stringify({ type: "choice", value: v }));
+}
+
+function lockButtons(v) {
+  document.querySelectorAll(".choiceButtons button").forEach(b => {
+    b.classList.add("locked");
+    if (Number(b.textContent) === v) b.classList.add("selected");
+  });
+}
+
+function unlockButtons() {
+  document.querySelectorAll(".choiceButtons button").forEach(b => {
+    b.classList.remove("locked", "selected");
+  });
+}
+
+/* ===== 順位 ===== */
+function showRanking(ranking) {
+  let html = `<div class="rank"><b>🏁 順位</b><br>`;
+  ranking.forEach(r => {
+    html += `${r.rank}位：${r.name}（${r.pos}段）<br>`;
+  });
+  html += "</div>";
+  ranking.innerHTML = html;
+}
+
+/* ===== 画面切替 ===== */
+function switchScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+</script>
+</body>
+</html>
