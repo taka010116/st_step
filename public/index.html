@@ -1,102 +1,222 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>ボードゲーム研究部</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>ボードゲーム研究部｜黒板展示</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: "Meiryo", "Segoe UI", sans-serif;
-      background: #ffffff;
-      color: #000;
-    }
+<style>
+@font-face {
+  font-family: "ChalkFont";
+  src: url("fonts/chalk.otf") format("opentype");
+}
 
-    header {
-      text-align: center;
-      padding: 40px 20px 20px;
-    }
+/* ===== 黒板 ===== */
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.05), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(255,255,255,0.04), transparent 45%),
+    linear-gradient(#1f3b2e, #162a22);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-    header img {
-      max-width: 420px;
-      width: 90%;
-      height: auto;
-    }
+/* ===== 全体 ===== */
+.container {
+  display: flex;
+  gap: 80px;
+  padding: 40px;
+}
 
-    main {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 40px 20px;
-    }
+/* ===== 左：画像 ===== */
+.images {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 72px;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 30px;
-    }
+.pin-card {
+  position: relative;
+  background: #f7f7f7;
+  padding: 12px 16px;
+  box-shadow: 0 6px 10px rgba(0,0,0,0.35);
+  transition: 0.25s;
+}
 
-    .card {
-      text-align: center;
-      border: 1px solid #ccc;
-      padding: 16px;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
+.pin-card img {
+  max-width: 160px;
+  display: block;
+}
 
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    }
+.pin1 { transform: rotate(-2deg); }
+.pin2 { transform: rotate(1.5deg); }
+.pin3 { transform: rotate(-1deg); }
+.pin4 { transform: rotate(2deg); }
 
-    .card img {
-      max-width: 100%;
-      height: auto;
-    }
+.pin-card::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff, #c00);
+  box-shadow: 0 2px 3px rgba(0,0,0,0.4);
+}
 
-    .card-title {
-      margin-top: 12px;
-      font-size: 16px;
-      letter-spacing: 1px;
-    }
+.pin-card.active {
+  box-shadow:
+    0 0 18px rgba(255,255,200,0.9),
+    0 8px 14px rgba(0,0,0,0.45);
+  transform: scale(1.05);
+}
 
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-  </style>
+/* ===== 中央：説明 ===== */
+.description {
+  width: 160px;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: "ChalkFont", serif;
+  font-size: 22px;
+  letter-spacing: 0.18em;
+  margin-top: 96px;
+  color: #f8f8f8;
+  white-space: pre-line;
+  text-shadow:
+    1px 1px 0 rgba(255,255,255,0.6),
+   -1px 0   0 rgba(255,255,255,0.35),
+    2px 2px 3px rgba(0,0,0,0.55),
+   -2px 3px 3px rgba(0,0,0,0.4);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s;
+}
+
+.description.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ===== 右：板書 ===== */
+.board {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: "ChalkFont", serif;
+  font-size: 44px;
+  letter-spacing: 0.18em;
+}
+
+.chalk {
+  text-shadow:
+    1px 1px 0 rgba(255,255,255,0.6),
+   -1px 0   0 rgba(255,255,255,0.35),
+    2px 2px 3px rgba(0,0,0,0.55),
+   -2px 3px 3px rgba(0,0,0,0.4);
+}
+
+.heading {
+  font-size: 56px;
+  margin-top: 72px;
+}
+
+.game {
+  font-size: 22px;
+  margin-top: 96px;
+  cursor: pointer;
+}
+
+.white { color: #f8f8f8; }
+.pink  { color: #ffb7c5; }
+
+/* 落書き */
+.rakugaki {
+  position: fixed;
+  left: 24px;
+  bottom: 20px;
+  width: 140px;
+  opacity: 0.65;
+  transform: rotate(-6deg);
+  pointer-events: none;
+  filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.4));
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+</style>
 </head>
+
 <body>
 
-  <!-- タイトル -->
-  <header>
-    <img src="images/titleK.png" alt="ボードゲーム研究部">
-  </header>
+<div class="container">
 
-  <!-- コンテンツ -->
-  <main>
-    <div class="grid">
+  <!-- 左：画像 -->
+  <div class="images">
+    <a href="st_step.html" class="pin-card pin1" data-game="st"><img src="images/title.png"></a>
+    <a href="nanarabe.html" class="pin-card pin2" data-game="nan"><img src="images/title7.png"></a>
+    <a href="double_mines.html" class="pin-card pin3" data-game="dm"><img src="images/titleD.png"></a>
+    <a href="index.html" class="pin-card pin4" data-game="club"><img src="images/titleK.png"></a>
+  </div>
 
-      <!-- Strategy Steps -->
-      <a href="st_step.html" class="card">
-        <img src="images/title.png" alt="Strategy Steps">
-        <div class="card-title">Strategy Steps</div>
-      </a>
+  <!-- 中央：説明 -->
+  <div class="description chalk" id="desc"></div>
 
-      <!-- 別ゲーム -->
-      <a href="https://my-worker.6322052.workers.dev/" class="card">
-        <img src="images/title7.png" alt="ゲーム2">
-        <div class="card-title">Game Title 2</div>
-      </a>
+  <!-- 右：板書 -->
+  <div class="board chalk">
 
-      <!-- 別ゲーム -->
-      <a href="game3.html" class="card">
-        <img src="images/titleD.png" alt="ゲーム3">
-        <div class="card-title">Game Title 3</div>
-      </a>
+    <div class="heading pink">ボードゲーム研究部</div><br>
 
-    </div>
-  </main>
+    <a href="st_step.html" class="game white" data-game="st">strategy steps</a><br>
+    <a href="nanarabe.html" class="game white" data-game="nan">七並べ名人戦</a><br>
+    <a href="nanarabe.html" class="game white" data-game="nan">ハサミ将棋</a><br><br>
+    <div class="heading pink">オリジナル</div><br>
+
+    <a href="double_mines.html" class="game white" data-game="dm">double mines</a><br>
+    <a href="osushi.html" class="game white" data-game="os">お寿司タワー</a><br>
+    <a href="osushi.html" class="game white" data-game="os">論理じゃんけん</a><br>
+  </div>
+</div>
+
+<img src="images/rakugaki.png" class="rakugaki">
+
+<script>
+const texts = {
+  st: "wii Partyの名作を再現！\n\nオンラインプレイ対応",
+  nan: "七並べを極めるオンライン対戦サイト。\n\n段位認定、レーティング機能搭載！",
+  dm: "二つの地雷原を読む\n\nリスク管理ゲーム",
+  os: "物理エンジンを使った\n\nお寿司積み上げゲーム"
+};
+
+const targets = document.querySelectorAll("[data-game]");
+const cards = document.querySelectorAll(".pin-card");
+const desc  = document.getElementById("desc");
+
+function activate(key) {
+  desc.textContent = texts[key] || "";
+  desc.classList.add("show");
+  cards.forEach(c =>
+    c.classList.toggle("active", c.dataset.game === key)
+  );
+}
+
+function deactivate() {
+  desc.textContent = "";
+  desc.classList.remove("show");
+  cards.forEach(c => c.classList.remove("active"));
+}
+
+targets.forEach(el => {
+  el.addEventListener("mouseenter", () => activate(el.dataset.game));
+  el.addEventListener("mouseleave", deactivate);
+});
+</script>
 
 </body>
 </html>
